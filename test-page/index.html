@@ -1,0 +1,386 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>1С-Премиум — тестовая страница виджета</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Onest:wght@400;500;600&family=Unbounded:wght@500;600&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --ink: #0e2a3a;
+      --tide: #1a5c78;
+      --mist: #e4ebf0;
+      --paper: #f3f6f8;
+      --card: #fbfdff;
+      --copper: #c4622d;
+      --copper-deep: #8c3e16;
+      --steel: #5c7080;
+      --line: #d3dee6;
+      --ok: #1f7a4d;
+    }
+
+    * { box-sizing: border-box; }
+
+    html { scroll-behavior: smooth; }
+
+    body {
+      margin: 0;
+      background:
+        radial-gradient(1200px 420px at 10% -10%, #d5e4ee 0%, transparent 55%),
+        var(--paper);
+      color: var(--ink);
+      font-family: "Onest", "Segoe UI", sans-serif;
+      font-size: 17px;
+      line-height: 1.5;
+    }
+
+    a { color: var(--tide); }
+    a:focus-visible, button:focus-visible {
+      outline: 2px solid var(--copper);
+      outline-offset: 3px;
+    }
+
+    .wrap {
+      width: min(1080px, calc(100% - 32px));
+      margin: 0 auto;
+    }
+
+    header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 24px;
+      padding: 22px 0 18px;
+    }
+
+    .mark {
+      font-family: "Unbounded", Bahnschrift, "Segoe UI", sans-serif;
+      font-weight: 600;
+      font-size: 15px;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      text-decoration: none;
+      color: var(--ink);
+    }
+
+    nav {
+      display: flex;
+      gap: 22px;
+    }
+
+    nav a {
+      color: var(--steel);
+      text-decoration: none;
+      font-size: 14px;
+      font-weight: 500;
+    }
+
+    nav a:hover { color: var(--ink); }
+
+    .mast {
+      display: grid;
+      grid-template-columns: 1.3fr 0.9fr;
+      gap: 36px;
+      align-items: end;
+      padding: 12px 0 42px;
+    }
+
+    .eyebrow {
+      margin: 0 0 14px;
+      color: var(--copper-deep);
+      font-size: 13px;
+      font-weight: 600;
+      letter-spacing: 0.04em;
+      text-transform: uppercase;
+    }
+
+    h1 {
+      margin: 0 0 16px;
+      font-family: "Unbounded", Bahnschrift, "Segoe UI", sans-serif;
+      font-weight: 500;
+      font-size: clamp(32px, 4vw, 46px);
+      line-height: 1.15;
+      letter-spacing: -0.03em;
+    }
+
+    .lede {
+      margin: 0;
+      max-width: 38em;
+      color: #243946;
+    }
+
+    .facts {
+      display: flex;
+      gap: 28px;
+      margin: 28px 0 0;
+      padding: 0;
+      list-style: none;
+    }
+
+    .facts strong {
+      display: block;
+      font-family: "Unbounded", Bahnschrift, "Segoe UI", sans-serif;
+      font-size: 15px;
+      font-weight: 500;
+    }
+
+    .facts span {
+      color: var(--steel);
+      font-size: 13px;
+    }
+
+    .ticket {
+      background: var(--card);
+      border: 1px solid var(--line);
+      border-radius: 4px 18px 18px 4px;
+      box-shadow: 8px 14px 0 rgba(14, 42, 58, 0.06);
+      position: relative;
+      overflow: hidden;
+    }
+
+    .ticket::before {
+      content: "";
+      position: absolute;
+      left: 0;
+      top: 0;
+      bottom: 0;
+      width: 14px;
+      background:
+        radial-gradient(circle at 0 12px, transparent 6px, var(--copper) 7px) 0 0 / 14px 24px repeat-y;
+    }
+
+    .ticket-body { padding: 22px 22px 18px 32px; }
+
+    .ticket-kicker {
+      margin: 0;
+      font-size: 12px;
+      letter-spacing: 0.14em;
+      text-transform: uppercase;
+      color: var(--steel);
+    }
+
+    .serial {
+      margin: 4px 0 12px;
+      font-family: "Unbounded", Bahnschrift, "Segoe UI", sans-serif;
+      font-size: 22px;
+      font-weight: 600;
+      color: var(--copper);
+    }
+
+    .ticket p { margin: 0 0 12px; }
+
+    .asks {
+      margin: 0;
+      padding: 0;
+      list-style: none;
+    }
+
+    .asks li {
+      display: grid;
+      grid-template-columns: 22px 1fr;
+      gap: 8px;
+      padding: 7px 0;
+      border-top: 1px dashed var(--line);
+      font-size: 15px;
+    }
+
+    .asks b {
+      color: var(--copper-deep);
+      font-weight: 600;
+    }
+
+    .status {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      margin-top: 14px;
+      color: var(--steel);
+      font-size: 13px;
+    }
+
+    .dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      background: #c4a15a;
+      flex: none;
+    }
+
+    .status.ready { color: var(--ok); }
+    .status.ready .dot { background: var(--ok); }
+    .status.fail { color: var(--copper-deep); }
+    .status.fail .dot { background: var(--copper); }
+
+    section { padding: 8px 0 36px; }
+
+    h2 {
+      margin: 0 0 14px;
+      font-family: "Unbounded", Bahnschrift, "Segoe UI", sans-serif;
+      font-size: 13px;
+      font-weight: 600;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+    }
+
+    .catalog {
+      margin: 0;
+      padding: 0;
+      list-style: none;
+      background: var(--card);
+      border: 1px solid var(--line);
+      border-radius: 16px;
+    }
+
+    .catalog li {
+      display: grid;
+      grid-template-columns: 52px 1fr;
+      gap: 8px;
+      padding: 14px 18px;
+      border-bottom: 1px solid var(--line);
+    }
+
+    .catalog li:last-child { border-bottom: 0; }
+
+    .catalog b {
+      font-family: "Unbounded", Bahnschrift, "Segoe UI", sans-serif;
+      font-size: 12px;
+      font-weight: 500;
+      color: var(--tide);
+    }
+
+    .split {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 18px;
+    }
+
+    .panel {
+      background: var(--ink);
+      color: #e7eef3;
+      border-radius: 16px;
+      padding: 22px 22px 18px;
+    }
+
+    .panel h2 { color: #9fb4c2; }
+
+    .panel p { margin: 0 0 8px; }
+    .panel a { color: #f0c9b4; }
+
+    footer {
+      padding: 8px 0 88px;
+      color: var(--steel);
+      font-size: 13px;
+    }
+
+    @media (max-width: 800px) {
+      .mast, .split { grid-template-columns: 1fr; }
+      nav { display: none; }
+      .facts { flex-direction: column; gap: 12px; }
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      html { scroll-behavior: auto; }
+    }
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <header>
+      <a class="mark" href="#top">1С-Премиум</a>
+      <nav>
+        <a href="#catalog">Каталог</a>
+        <a href="#hours">График</a>
+        <a href="#contacts">Контакты</a>
+      </nav>
+    </header>
+
+    <main id="top">
+      <div class="mast">
+        <div>
+          <p class="eyebrow">Учебная страница · проверка виджета</p>
+          <h1>Премиальная поддержка систем на платформе 1С</h1>
+          <p class="lede">Ассистент в правом нижнем углу отвечает по материалам компании: каталог услуг, контакты и график работы. Откройте чат и задайте один из вопросов с талона.</p>
+          <ul class="facts">
+            <li><strong>10:00–19:00</strong><span>офис, будни, Москва</span></li>
+            <li><strong>круглосуточно</strong><span>срочные инциденты</span></li>
+            <li><strong>с 2023</strong><span>текущий формат услуг</span></li>
+          </ul>
+        </div>
+
+        <aside class="ticket" aria-label="Талон для проверки чата">
+          <div class="ticket-body">
+            <p class="ticket-kicker">Талон обращения</p>
+            <p class="serial">ПР-204</p>
+            <p>Спросите в чате справа внизу:</p>
+            <ol class="asks">
+              <li><b>1</b><span>Какие направления есть в каталоге услуг?</span></li>
+              <li><b>2</b><span>Куда писать, чтобы получить предложение?</span></li>
+              <li><b>3</b><span>Какой график работы офиса?</span></li>
+            </ol>
+            <p class="status" id="widget-status"><span class="dot" aria-hidden="true"></span><span id="widget-status-text">Ждём загрузку виджета</span></p>
+          </div>
+        </aside>
+      </div>
+
+      <section id="catalog">
+        <h2>Каталог услуг</h2>
+        <ol class="catalog">
+          <li><b>01</b><span>Целевая архитектура и сопровождение проектов</span></li>
+          <li><b>02</b><span>Аудит, мониторинг, сопровождение систем</span></li>
+          <li><b>03</b><span>Оптимизация производительности</span></li>
+          <li><b>04</b><span>Управление клиентскими разработками</span></li>
+          <li><b>05</b><span>Обновление и миграция систем</span></li>
+          <li><b>06</b><span>Управление данными</span></li>
+          <li><b>07</b><span>Корпоративная поддержка типовых решений</span></li>
+          <li><b>08</b><span>Архитектура обмена данными. 1С:Шина</span></li>
+        </ol>
+      </section>
+
+      <div class="split">
+        <section class="panel" id="hours">
+          <h2>График</h2>
+          <p>Офис: понедельник–пятница, 10:00–19:00 (МСК).</p>
+          <p>Обед: 13:00–14:00. Суббота и воскресенье — выходные.</p>
+          <p>Приём посетителей только по записи, не меньше чем за один рабочий день.</p>
+        </section>
+        <section class="panel" id="contacts">
+          <h2>Контакты</h2>
+          <p>Общая почта: <a href="mailto:info@1c-prem.ru">info@1c-prem.ru</a></p>
+          <p>Предложение: <a href="mailto:corp@1c-prem.ru">corp@1c-prem.ru</a></p>
+          <p>127434, Москва, Дмитровское шоссе, д. 9Б</p>
+        </section>
+      </div>
+    </main>
+
+    <footer>
+      Учебная страница для встройки виджета Chatbase. Тексты собраны из открытого описания ООО «1С-Премиум».
+    </footer>
+  </div>
+
+  <script>
+    (function () {
+      var status = document.getElementById("widget-status");
+      var text = document.getElementById("widget-status-text");
+      function mark(ok, message) {
+        status.classList.remove("ready", "fail");
+        status.classList.add(ok ? "ready" : "fail");
+        text.textContent = message;
+      }
+      function check() {
+        var node = document.getElementById("6fbogaXN4LmMDG4ghEKg1");
+        if (node) mark(true, "Виджет подключён — кнопка чата справа внизу");
+        else mark(false, "Скрипт виджета не появился на странице");
+      }
+      window.addEventListener("load", function () {
+        check();
+        setTimeout(check, 1500);
+      });
+    })();
+  </script>
+  <script>
+(function(){if(!window.chatbase||window.chatbase("getState")!=="initialized"){window.chatbase=(...arguments)=>{if(!window.chatbase.q){window.chatbase.q=[]}window.chatbase.q.push(arguments)};window.chatbase=new Proxy(window.chatbase,{get(target,prop){if(prop==="q"){return target.q}return(...args)=>target(prop,...args)}})}const onLoad=function(){const script=document.createElement("script");script.src="https://www.chatbase.co/embed.min.js";script.id="6fbogaXN4LmMDG4ghEKg1";script.domain="www.chatbase.co";document.body.appendChild(script)};if(document.readyState==="complete"){onLoad()}else{window.addEventListener("load",onLoad)}})();
+</script>
+</body>
+</html>

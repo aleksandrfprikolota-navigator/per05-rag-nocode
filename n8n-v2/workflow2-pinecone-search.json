@@ -1,0 +1,228 @@
+{
+  "name": "Pinecone Search — прокси OpenAI",
+  "nodes": [
+    {
+      "parameters": {
+        "content": "## Две разные карточки Header Auth\nGet Query Embedding: новая карточка, заголовок Authorization, значение Bearer и ключ OpenAI. Прокси http://host.docker.internal:8118.\nQuery Pinecone: старая карточка, заголовок Api-Key, значение — ключ Pinecone.\nОдну карточку на обе ноды не ставить.",
+        "height": 200,
+        "width": 520,
+        "color": 4
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        240,
+        40
+      ],
+      "id": "sticky-search-proxy",
+      "name": "Памятка прокси"
+    },
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "pinecone-search",
+        "responseMode": "responseNode",
+        "options": {}
+      },
+      "id": "webhook-trigger",
+      "name": "Webhook",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 1,
+      "position": [
+        240,
+        300
+      ],
+      "webhookId": "pinecone-search-webhook"
+    },
+    {
+      "parameters": {
+        "functionCode": "const inputItem = $input.item;\nconst body = inputItem?.json?.body || inputItem?.json || {};\n\nconst query = body.query || body.body?.query;\n\nif (!query || typeof query !== 'string') {\n  throw new Error(`Query field is required. Received: ${JSON.stringify(body)}`);\n}\n\nreturn [{\n  json: {\n    query: query,\n    namespace: body.namespace || 'default'\n  }\n}];"
+      },
+      "id": "function-process-query",
+      "name": "Process Query",
+      "type": "n8n-nodes-base.function",
+      "typeVersion": 1,
+      "position": [
+        460,
+        300
+      ]
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://api.openai.com/v1/embeddings",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpHeaderAuth",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Content-Type",
+              "value": "application/json"
+            }
+          ]
+        },
+        "sendBody": true,
+        "bodyParameters": {
+          "parameters": []
+        },
+        "specifyBody": "json",
+        "jsonBody": "={{ {\n  \"model\": \"text-embedding-3-large\",\n  \"input\": $json.query,\n  \"dimensions\": 1024\n} }}",
+        "options": {
+          "proxy": "http://host.docker.internal:8118",
+          "timeout": 120000
+        }
+      },
+      "id": "http-openai-query-embed",
+      "name": "Get Query Embedding",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "notes": "Proxy: http://host.docker.internal:8118",
+      "notesInFlow": true,
+      "position": [
+        680,
+        300
+      ],
+      "credentials": {
+        "httpHeaderAuth": {
+          "id": "openai-credentials",
+          "name": "OpenAI API"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://rag-company-index-d7ivl8s.svc.aped-4627-b74a.pinecone.io/query",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpHeaderAuth",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Content-Type",
+              "value": "application/json"
+            }
+          ]
+        },
+        "sendBody": true,
+        "bodyParameters": {
+          "parameters": []
+        },
+        "specifyBody": "json",
+        "jsonBody": "={{ {\n  \"vector\": $('Get Query Embedding').item.json.data[0].embedding,\n  \"topK\": 5,\n  \"includeMetadata\": true,\n  \"namespace\": $('Process Query').item.json.namespace\n} }}",
+        "options": {}
+      },
+      "id": "http-pinecone-query",
+      "notes": "Header Auth: имя Api-Key, значение — ключ Pinecone",
+      "notesInFlow": true,
+      "name": "Query Pinecone",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.1,
+      "position": [
+        900,
+        300
+      ],
+      "credentials": {
+        "httpHeaderAuth": {
+          "id": "pinecone-credentials",
+          "name": "Pinecone API"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "functionCode": "const matches = $input.item.json.matches || [];\n\nreturn matches.map(match => ({\n  json: {\n    text: match.metadata?.text || '',\n    score: match.score || 0,\n    source: match.metadata?.source || 'unknown',\n    chunk_index: match.metadata?.chunk_index || -1,\n    id: match.id\n  }\n}));"
+      },
+      "id": "function-format-results",
+      "name": "Format Results",
+      "type": "n8n-nodes-base.function",
+      "typeVersion": 1,
+      "position": [
+        1120,
+        300
+      ]
+    },
+    {
+      "parameters": {
+        "respondWith": "json",
+        "responseBody": "={{ $input.all().map(item => item.json) }}",
+        "options": {}
+      },
+      "id": "respond-to-webhook",
+      "name": "Respond to Webhook",
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1,
+      "position": [
+        1340,
+        300
+      ]
+    }
+  ],
+  "connections": {
+    "Webhook": {
+      "main": [
+        [
+          {
+            "node": "Process Query",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Process Query": {
+      "main": [
+        [
+          {
+            "node": "Get Query Embedding",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get Query Embedding": {
+      "main": [
+        [
+          {
+            "node": "Query Pinecone",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Query Pinecone": {
+      "main": [
+        [
+          {
+            "node": "Format Results",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Format Results": {
+      "main": [
+        [
+          {
+            "node": "Respond to Webhook",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "pinData": {},
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "staticData": null,
+  "tags": [],
+  "triggerCount": 0,
+  "updatedAt": "2026-10-10T18:21:00.000Z",
+  "versionId": "proxy-8118"
+}

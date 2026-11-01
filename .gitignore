@@ -1,0 +1,6 @@
+n8n-v2/venv/
+__pycache__/
+*.pyc
+.env
+.env.*
+*.log
